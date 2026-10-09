@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101828">
+  <title>Writing Activity · Friendship Camp</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --ink: #101828;
+      --muted: #667085;
+      --line: #d0d5dd;
+      --line-strong: #98a2b3;
+      --accent: #002147;
+      --accent-soft: #e9f0f7;
+      --accent-dark: #00152f;
+      --success: #067647;
+      --success-soft: #ecfdf3;
+      --danger: #b42318;
+      --danger-soft: #fef3f2;
+      --reveal: #164b78;
+      --reveal-soft: #eaf2f8;
+      --shadow-sm: 0 1px 2px rgba(16,24,40,.05);
+      --shadow-md: 0 8px 24px rgba(16,24,40,.08);
+      --shadow-lg: 0 18px 45px rgba(16,24,40,.10);
+      --radius: 18px;
+      --cell-size: 42px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(23,105,224,.08), transparent 28rem),
+        linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    .page {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0 56px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--accent-dark);
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      border-radius: 99px;
+      background: #002147;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .hero-badge {
+      flex: 0 0 auto;
+      padding: 11px 15px;
+      border: 1px solid #dbe5f2;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      color: #344054;
+      box-shadow: var(--shadow-sm);
+      font-size: .88rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(330px, .7fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(255,255,255,.97);
+      border: 1px solid rgba(208,213,221,.85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .puzzle-card {
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: -.015em;
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .progress {
+      width: 108px;
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e4e7ec;
+    }
+
+    .progress > span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: #002147;
+      transition: width .2s ease;
+    }
+
+    .board-shell {
+      display: flex;
+      justify-content: center;
+      padding: 34px;
+      overflow: auto;
+      border: 1px solid rgba(0, 33, 71, .45);
+      border-radius: 16px;
+      background:
+        linear-gradient(145deg, #00315f 0%, #002147 52%, #001a38 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 0 0 1px rgba(255,255,255,.035),
+        0 14px 28px rgba(0,33,71,.18);
+    }
+
+    #crossword-grid {
+      display: grid;
+      gap: 0;
+      width: max-content;
+      user-select: none;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.24));
+    }
+
+    /* Oxford Blue board treatment */
+    .board-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .board-shell {
+      position: relative;
+    }
+
+    .board-shell > #crossword-grid {
+      position: relative;
+      z-index: 1;
+    }
+
+    .board-shell::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -80px;
+      bottom: -100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.035);
+      pointer-events: none;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      position: relative;
+    }
+
+    .cell.active {
+      background: #ffffff;
+      border: 1px solid #00152f;
+      margin: 0 -1px -1px 0;
+    }
+
+    .cell input {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      text-align: center;
+      text-transform: uppercase;
+      color: #101828;
+      background: transparent;
+      caret-color: transparent;
+      cursor: pointer;
+      font-size: 1.12rem;
+      font-weight: 800;
+    }
+
+    .cell input:focus {
+      background: #e9f0f7;
+      box-shadow: inset 0 0 0 3px #4f8ab8;
+    }
+
+    .cell .number {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      z-index: 1;
+      color: #475467;
+      font-size: .59rem;
+      font-weight: 800;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .cell.correct input {
+      color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .cell.incorrect input {
+      color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .cell.revealed input {
+      color: var(--reveal);
+      background: var(--reveal-soft);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      min-height: 44px;
+      padding: 0 17px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 800;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    button:active { transform: translateY(0); }
+
+    .primary {
+      color: #fff;
+      background: #002147;
+    }
+
+    .primary:hover { background: #00152f; }
+
+    .secondary {
+      color: #344054;
+      background: #ffffff;
+      border-color: var(--line);
+    }
+
+    .secondary:hover { background: #f9fafb; }
+
+    .danger {
+      color: #b54708;
+      background: #fffaeb;
+      border-color: #fedf89;
+    }
+
+    .result {
+      flex: 1 1 100%;
+      min-height: 24px;
+      margin: 3px 2px 0;
+      color: var(--muted);
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .score-high { color: var(--success); }
+    .score-med { color: #b54708; }
+    .score-low { color: var(--danger); }
+
+    .clues-card {
+      padding: 24px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .clues-intro {
+      margin: -7px 0 20px;
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+
+    .clues-columns {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .clue-column h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eaecf0;
+      color: #1d2939;
+      font-size: .82rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .clue-column h3::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #002147;
+    }
+
+    .clue-list {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .clue-list li {
+      padding: 10px 10px;
+      border-radius: 9px;
+      color: #475467;
+      font-size: .88rem;
+      line-height: 1.45;
+      transition: background .15s ease;
+    }
+
+    .clue-list li:hover { background: #f8fafc; }
+
+    .clue-list strong {
+      display: inline-block;
+      min-width: 25px;
+      color: #002147;
+      font-weight: 900;
+    }
+
+    .tips {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .tip {
+      padding: 14px 15px;
+      border: 1px solid #eaecf0;
+      border-radius: 12px;
+      background: rgba(255,255,255,.72);
+    }
+
+    .tip-label {
+      margin-bottom: 4px;
+      color: #98a2b3;
+      font-size: .68rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .tip p {
+      margin: 0;
+      color: #475467;
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+
+    footer {
+      margin-top: 28px;
+      color: #98a2b3;
+      text-align: center;
+      font-size: .78rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .clues-card { position: static; }
+      .clues-columns { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      :root { --cell-size: 31px; }
+
+      .page {
+        width: min(100% - 18px, 1240px);
+        padding-top: 24px;
+      }
+
+      .hero {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .hero-badge { display: none; }
+
+      .puzzle-card, .clues-card { padding: 14px; }
+
+      .board-shell {
+        padding: 22px 10px;
+        justify-content: flex-start;
+      }
+
+      .cell input { font-size: .9rem; }
+      .cell .number { font-size: .5rem; top: 2px; left: 3px; }
+
+      .controls button {
+        flex: 1 1 calc(50% - 5px);
+      }
+
+      .clues-columns { grid-template-columns: 1fr; }
+      .tips { grid-template-columns: 1fr; }
+    }
+  
+        .study-notice {
+            margin: 0 0 14px;
+            padding: 11px 14px;
+            border-left: 4px solid #002147;
+            background: #eef4f9;
+            color: #17324d;
+            border-radius: 8px;
+            font-size: .9rem;
+            line-height: 1.45;
+        }
+        .timer-row, .report-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .timer-row {
+            margin: 12px 0 8px;
+            color: #002147;
+            font-weight: 700;
+        }
+        #timer {
+            min-width: 76px;
+            text-align: center;
+            padding: 7px 12px;
+            border-radius: 8px;
+            background: #002147;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: .04em;
+        }
+        .report-row {
+            margin: 10px 0 16px;
+            align-items: center;
+        }
+        .secondary-btn {
+            border: 1px solid #002147;
+            background: #fff;
+            color: #002147;
+            border-radius: 9px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+        .secondary-btn:hover:not(:disabled) {
+            background: #002147;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .secondary-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+        .report-status {
+            color: #617286;
+            font-size: .82rem;
+        }
+        .report-status.ready {
+            color: #14532d;
+            font-weight: 700;
+        }
+        .report-status.locked {
+            color: #8b1e1e;
+            font-weight: 700;
+        }
+        @media (max-width: 640px) {
+            .report-row {
+                align-items: stretch;
+            }
+            .secondary-btn {
+                width: 100%;
+            }
+        }
+
+
+    .assessment-tools {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid #d0d5dd;
+      border-radius: 12px;
+      background: #f8fafc;
+    }
+    .assessment-notice {
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border-left: 4px solid #002147;
+      border-radius: 7px;
+      background: #e9f0f7;
+      color: #17324d;
+      font-size: .85rem;
+      line-height: 1.45;
+    }
+    .assessment-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .elapsed-time {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #344054;
+      font-weight: 700;
+    }
+    #elapsed-time {
+      min-width: 92px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #002147;
+      color: white;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .04em;
+    }
+    .download-report {
+      min-height: 44px;
+      padding: 0 17px;
+      border: 1px solid #002147;
+      border-radius: 9px;
+      background: #002147;
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .download-report:hover:not(:disabled) {
+      background: #00152f;
+    }
+    .download-report:disabled {
+      background: #98a2b3;
+      border-color: #98a2b3;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    .download-status {
+      margin-top: 8px;
+      color: #667085;
+      font-size: .8rem;
+    }
+    .download-status.ready {
+      color: #067647;
+      font-weight: 700;
+    }
+    .download-status.locked {
+      color: #b42318;
+      font-weight: 700;
+    }
+    @media (max-width: 640px) {
+      .assessment-row { align-items: stretch; }
+      .elapsed-time, .download-report { width: 100%; justify-content: center; }
+    }
+
+    /* ---------- School banner & student selectors ---------- */
+    .school-banner {
+      margin-bottom: 18px;
+      padding: 26px 24px;
+      border-radius: var(--radius);
+      background: #002147;
+      color: #ffffff;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+    .school-banner .school-name {
+      margin: 0;
+      color: #ffffff;
+      font-size: clamp(1.5rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: .08em;
+      line-height: 1.1;
+    }
+    .school-banner .school-subtitle {
+      margin: 8px 0 0;
+      color: #ffffff;
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+      font-weight: 500;
+      letter-spacing: .04em;
+    }
+    .student-picker {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 16px;
+      margin-bottom: 26px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .student-picker label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .student-picker select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+    .student-picker select:focus {
+      outline: 2px solid #002147;
+      outline-offset: 1px;
+    }
+    .student-picker select:disabled { background: var(--surface-soft); color: var(--muted); }
+    @media (max-width: 700px) { .student-picker { grid-template-columns: 1fr; } }
+
+    /* ---------- Board lock until a student is selected ---------- */
+    .board-shell { position: relative; }
+    .board-lock {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border-radius: inherit;
+      background: rgba(255,255,255,.9);
+      color: #002147;
+      font-weight: 800;
+      text-align: center;
+    }
+    .board-shell.locked .board-lock { display: flex; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+
+    /* ---------- Writing activity ---------- */
+    .writing-shell { position: relative; margin-top: 4px; border-radius: 14px; }
+    .writing-shell.locked .board-lock { display: flex; }
+    #answer-text {
+      display: block;
+      width: 100%;
+      min-height: 360px;
+      padding: 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.02rem;
+      line-height: 1.65;
+      resize: vertical;
+    }
+    #answer-text:focus { outline: 2px solid #002147; outline-offset: 1px; }
+    #answer-text:disabled { background: var(--surface-soft); }
+    .counter-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px 16px;
+      margin-top: 10px;
+      font-size: .92rem;
+      font-weight: 700;
+    }
+    .word-count { color: #b54708; }
+    .word-count.ok { color: var(--success); }
+    .word-count-hint { color: var(--muted); font-weight: 600; }
+    .question-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+    .question-list li {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-soft);
+      line-height: 1.5;
+    }
+    .question-list .q-num {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #002147;
+      color: #fff;
+      font-weight: 800;
+    }
+
+</style>
+</head>
+
+<body>
+  <main class="page">
+    <div class="school-banner">
+      <p class="school-name">COLEGIO SAN IGNACIO</p>
+      <p class="school-subtitle">Writing Activity</p>
+    </div>
+
+    <section class="student-picker" aria-label="Student information">
+      <div>
+        <label for="course-select">Class</label>
+        <select id="course-select">
+          <option value="">Select your class</option>
+          <option value="8th Grade A">8th Grade A</option>
+          <option value="8th Grade B">8th Grade B</option>
+          <option value="8th Grade C">8th Grade C</option>
+        </select>
+      </div>
+      <div>
+        <label for="student-select">Student</label>
+        <select id="student-select" disabled>
+          <option value="">First select your class</option>
+        </select>
+      </div>
+    </section>
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Writing practice</div>
+        <h1>Friendship Camp</h1>
+        <p class="subtitle">
+          Read the three questions, prepare your ideas and write your answer in the space below. Your text must have at least 200 words.
+        </p>
+      </div>
+      <div class="hero-badge">200 words minimum</div>
+    </header>
+
+    <section class="layout">
+      <div class="card puzzle-card">
+        <div class="section-head">
+          <h2 class="section-title">Your answer</h2>
+          <div class="progress-wrap">
+            <span id="progress-text">0 / 200</span>
+            <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+          </div>
+        </div>
+
+        <div class="writing-shell" id="writing-shell">
+          <label for="answer-text" class="sr-only" style="position:absolute;left:-9999px">Write your answer here</label>
+          <textarea id="answer-text" placeholder="Write your answer here. Answer questions 1, 2 and 3 in your text..." spellcheck="true"></textarea>
+        </div>
+
+        <div class="counter-row">
+          <span id="word-count" class="word-count" role="status" aria-live="polite">Words: 0 / 200</span>
+          <span id="word-hint" class="word-count-hint">200 words to go</span>
+        </div>
+
+        <div class="controls">
+          <button id="verify-btn" class="primary">Check answer</button>
+          <button id="restart-btn" class="danger">Re start</button>
+          <div id="result-message" class="result" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="assessment-tools">
+          <div class="assessment-notice">
+            <strong>Report:</strong>
+            Your report includes your answer, word count and completion time.
+          </div>
+          <div class="assessment-row">
+            <div class="elapsed-time">
+              <span>Time:</span>
+              <strong id="elapsed-time">00:00:00</strong>
+            </div>
+            <button id="download-report-btn" class="download-report" type="button" disabled>
+              ↓ Download Report (.DOC)
+            </button>
+          </div>
+          <div id="download-status" class="download-status">
+            Write at least 200 words and click Check answer to enable the report.
+          </div>
+        </div>
+
+        <div class="tips">
+          <div class="tip">
+            <div class="tip-label">Plan</div>
+            <p>Read all three questions and think about your ideas before you start writing.</p>
+          </div>
+          <div class="tip">
+            <div class="tip-label">Structure</div>
+            <p>Answer the questions in order: 1, 2 and 3.</p>
+          </div>
+          <div class="tip">
+            <div class="tip-label">Length</div>
+            <p>Use the word counter to reach at least 200 words.</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="card clues-card">
+        <div class="section-head">
+          <h2 class="section-title">Questions</h2>
+        </div>
+        <p class="clues-intro">Answer all three questions in one text.</p>
+        <ol class="question-list" id="question-list"></ol>
+      </aside>
+    </section>
+
+    <footer>Writing Activity · Friendship Camp</footer>
+  </main>
+
+  <script>
+    const MIN_WORDS = 200;
+    const QUESTIONS = [
+      "Define what FRIENDSHIP CAMP is.",
+      "What was the best moment at this camp?",
+      "What did you learn with this experience?"
+    ];
+    const STUDENTS_BY_COURSE = {
+  "8th Grade A": [
+    "Barra Sanz Pía Del Pilar",
+    "Carrizo Montecinos Tamara Isabel",
+    "Chávez Hernández Joaquín Ignacio",
+    "Cheung Abarzúa Chienyi Francisco",
+    "Coloma Zúñiga Amara Eluney",
+    "Díaz Castro Catalina Matilda",
+    "Díaz Cortés Benjamín Alonso",
+    "Espinosa Cornejo Amanda Catalina",
+    "Espinoza García Cristóbal Guillermo",
+    "González Narváez Emilia Fernanda",
+    "González Valdebenito Tomás Felipe",
+    "Guzmán Zamora Josefina Paz",
+    "Henríquez Pozo Baltasar",
+    "Hernández Callejas Salvador",
+    "Jara Villanueva Florencia Sofía",
+    "Jorquera Guzmán Camila Ignacia",
+    "Linares Sirit Mathias Alejandro",
+    "Lobos Arredondo Santiago Alonso",
+    "Mahncke Monsalve Benjamín Alonso",
+    "Mardones Villalón Martín Ignacio",
+    "Moreno Tejias Santiago José",
+    "Ovalle Navarrete Amanda Carolina",
+    "Pereira Mora Josefa Melina",
+    "Pino Carrasco Paula Elisa",
+    "Reyes Bichara Santiago Said",
+    "Rochd Garrido Karim Abdu",
+    "Rojas Reyes Jonas Ignacio",
+    "Rojas Soto Amanda Ignacia",
+    "Santander Poblete Pascale Monserrat",
+    "Sepúlveda Rebolledo Pía Catalina",
+    "Squella Troncoso Ignacio Enrique",
+    "Tobar González Tomás Pablo",
+    "Torres Cena Javier Ignacio",
+    "Ulloa Bravo Nicolás Alonso",
+    "Vaccarella Henríquez Diego Antonio",
+    "Vergara Fuenzalida Martina Belén",
+    "Zamora Moreno Gaspar Emilio"
+  ],
+  "8th Grade B": [
+    "Acuña Cifras Magdalena Paz",
+    "Arteaga Córdova Maximiliano Andrés",
+    "Brunet Cuellar Esteban Daniel",
+    "Castro Cepeda Maximiliano",
+    "Contreras Pozo Francisca Emilia",
+    "Cordero Quiroz Isabella Ignacia",
+    "Cukic Luengo Belén Antonia",
+    "Del Campo Díaz Martín",
+    "Díaz Navarrete Santiago Ignacio",
+    "Dotte Ramírez Bruno Alonso",
+    "Filippi Cvjetkovic Amparo",
+    "Flores Martínez Dominga Paz",
+    "Fuentes Vásquez Martina Ignacia",
+    "Gutiérrez Urtulla Cristóbal Patricio",
+    "Ibarra Barraza Ema Francisca",
+    "Madariaga Cheix Agustín Matías",
+    "Mella González Paz Isidora",
+    "Molina Bardelli Isidora Agustina",
+    "Morales Ibarra Adolfo Cristóbal",
+    "Neculqueo Mura José Manuel",
+    "Olivares Fincheira Isidora Fernanda",
+    "Olivares Vidal Cristóbal Elías",
+    "Orellana Hernández Borja Ignacio",
+    "Osorio Cortez Benjamín Alejandro",
+    "Osorno Arriagada Emma Magdalena",
+    "Ovalle Navarrete Antonia Carolina",
+    "Peredo Jansana Matías",
+    "Pérez González Matías Ignacio",
+    "Pérez Villalobos Camila Isidora",
+    "Roa Ramírez José Tomás",
+    "Ruiz Urzúa Emilia",
+    "Salinas Bustamante Isidora Agustina",
+    "Sánchez Ortiz Tomás Eduardo",
+    "Silva Ortega Gabriel Enrique",
+    "Trullén Robledo Pablo Renato",
+    "Vargas Abarca Renato Gustavo",
+    "Vines Zúñiga Francisco Antonio",
+    "Guzman Gonzalez Agustin Nicolás"
+  ],
+  "8th Grade C": [
+    "Ahumada Villagra Agustín Pascual",
+    "Arce Ramírez Isidora Alejandra",
+    "Arellano Jorquera Amanda Jesús",
+    "Badilla Díaz Valentina Anaís",
+    "Baeza Ara Baltasar Ignacio",
+    "Barrientos Casas-Cordero Rafael Emilio",
+    "Basaure Mora Emilio Santiago",
+    "Blondel Palza Cristóbal José",
+    "Bruna Rodríguez Laura Victoria",
+    "Cabezas Cárdenas Jose-Ignacio",
+    "Díaz Bravo Antonio Eduardo",
+    "Fernández Bustos Ignacia Francisca",
+    "Goncalves Freire Ana Maria",
+    "Granadino Inostroza Matías Felipe",
+    "Gutiérrez Ferrando Marco Agustín",
+    "Ite Hernández Bruno León",
+    "Izaga Franco Martín Ignacio",
+    "León Rosales Nicolás Alonso",
+    "Madariaga Olave Amanda Victoria",
+    "Mazuela Troncoso Alfredo Antonio",
+    "Muñoz Olivos Franco André",
+    "Muñoz Tobar Gabriel Ignacio",
+    "Navarro Espinoza Pascal Rebeca",
+    "Olivares Guajardo Agustina Antonella",
+    "Osorio Bernal Diego Vicente",
+    "Padilla Romero Trinidad Isabel",
+    "Palma González Benjamín Diego",
+    "Pérez Paredes Benjamín Alfonso",
+    "Romero Gatica Gabriel Alejandro",
+    "Ruiz Llano Javiera Ignacia",
+    "Salazar Belmar Consthanza Elizabeth",
+    "Sepúlveda de los Ríos Cybele Carolina",
+    "Torres Ramírez Domingo",
+    "Valenzuela Albornoz Matilde Ignacia",
+    "Valiente Núñez Julián Agustín",
+    "Videla Andia Mateo Francisco",
+    "Zapata Arancibia Antonia Emilia"
+  ]
+};
+
+    let elapsedSeconds = 0;
+    let timerInterval = null;
+    let answerChecked = false;
+
+    const $ = id => document.getElementById(id);
+
+    /* ---------- Word counter ---------- */
+    function countWords(text) {
+      const t = text.trim();
+      return t === '' ? 0 : t.split(/\s+/).length;
+    }
+
+    function updateCounter() {
+      const words = countWords($('answer-text').value);
+      const counter = $('word-count');
+      counter.textContent = `Words: ${words} / ${MIN_WORDS}`;
+      counter.classList.toggle('ok', words >= MIN_WORDS);
+      $('word-hint').textContent = words >= MIN_WORDS
+        ? 'Minimum reached'
+        : `${MIN_WORDS - words} words to go`;
+      $('progress-text').textContent = `${Math.min(words, MIN_WORDS)} / ${MIN_WORDS}`;
+      $('progress-bar').style.width = `${Math.min(100, Math.round((words / MIN_WORDS) * 100))}%`;
+      return words;
+    }
+
+    /* ---------- Timer ---------- */
+    function formatElapsed(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+    }
+    function updateTimerDisplay() {
+      $('elapsed-time').textContent = formatElapsed(elapsedSeconds);
+    }
+    function startTimer() {
+      if (timerInterval) return;
+      timerInterval = setInterval(() => {
+        if (!answerChecked) {
+          elapsedSeconds++;
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    /* ---------- Report state ---------- */
+    function updateReportState() {
+      const button = $('download-report-btn');
+      const status = $('download-status');
+      if (answerChecked) {
+        button.disabled = false;
+        status.className = 'download-status ready';
+        status.textContent = 'Report ready. Completion time is included.';
+      } else {
+        button.disabled = true;
+        status.className = 'download-status';
+        status.textContent = 'Write at least 200 words and click Check answer to enable the report.';
+      }
+    }
+
+    function escapeReportText(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function selectedCourse() { return $('course-select').value || 'Not selected'; }
+    function selectedStudent() { return $('student-select').value || 'Not selected'; }
+
+    function downloadReport() {
+      if (!answerChecked) return;
+
+      const text = $('answer-text').value;
+      const words = countWords(text);
+      const questions = QUESTIONS
+        .map((q, i) => `<li>${escapeReportText(q)}</li>`).join('');
+      const paragraphs = text.split(/\n+/)
+        .filter(p => p.trim() !== '')
+        .map(p => `<p>${escapeReportText(p)}</p>`).join('');
+
+      const report = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Writing Report - Friendship Camp</title>
+<style>
+body{font-family:Arial,sans-serif;margin:40px;color:#101828}
+h1{color:#002147}
+.info{padding:16px;background:#e9f0f7;border-left:4px solid #002147}
+.answer{margin-top:12px;padding:16px;border:1px solid #d0d5dd;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>Writing Activity · Friendship Camp</h1>
+<div class="info">
+<strong>School:</strong> COLEGIO SAN IGNACIO<br>
+<strong>Course:</strong> ${escapeReportText(selectedCourse())}<br>
+<strong>Student:</strong> ${escapeReportText(selectedStudent())}<br>
+<strong>Words:</strong> ${words} (minimum ${MIN_WORDS})<br>
+<strong>Time:</strong> ${formatElapsed(elapsedSeconds)}<br>
+<strong>Date:</strong> ${escapeReportText(new Date().toLocaleString())}
+</div>
+<h2>Questions</h2>
+<ol>${questions}</ol>
+<h2>Answer</h2>
+<div class="answer">${paragraphs}</div>
+</body>
+</html>`;
+
+      const blob = new Blob([report], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'writing-report.doc';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    /* ---------- Actions ---------- */
+    function checkAnswer() {
+      const words = updateCounter();
+      const msg = $('result-message');
+
+      if (words >= MIN_WORDS) {
+        answerChecked = true;
+        msg.className = 'score-high';
+        msg.textContent = `Great job! You wrote ${words} words. 🎉`;
+      } else {
+        answerChecked = false;
+        msg.className = words >= MIN_WORDS * 0.7 ? 'score-med' : 'score-low';
+        msg.textContent = `You need ${MIN_WORDS - words} more words to reach the minimum.`;
+      }
+      updateReportState();
+    }
+
+    function restartWriting() {
+      $('answer-text').value = '';
+      answerChecked = false;
+      elapsedSeconds = 0;
+      updateTimerDisplay();
+      updateCounter();
+      updateReportState();
+      const msg = $('result-message');
+      msg.className = 'result';
+      msg.textContent = '';
+      startTimer();
+      $('answer-text').focus();
+    }
+
+    /* ---------- Lock until a student is selected ---------- */
+    function setControlsDisabled(disabled) {
+      ['verify-btn', 'restart-btn'].forEach(id => { $(id).disabled = disabled; });
+      $('answer-text').disabled = disabled;
+    }
+
+    function lockBoard() {
+      stopTimer();
+      elapsedSeconds = 0;
+      answerChecked = false;
+      $('answer-text').value = '';
+      updateTimerDisplay();
+      updateCounter();
+      updateReportState();
+      $('download-report-btn').disabled = true;
+      const msg = $('result-message');
+      msg.className = 'result';
+      msg.textContent = '';
+      setControlsDisabled(true);
+      $('writing-shell').classList.add('locked');
+    }
+
+    function syncLock() {
+      const ready = !!$('course-select').value && !!$('student-select').value;
+      if (!ready) {
+        lockBoard();
+        return;
+      }
+      // Ready: first unlock, or a different student -> fresh attempt
+      $('writing-shell').classList.remove('locked');
+      setControlsDisabled(false);
+      restartWriting();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Questions
+      const list = $('question-list');
+      QUESTIONS.forEach((q, i) => {
+        const li = document.createElement('li');
+        const num = document.createElement('span');
+        num.className = 'q-num';
+        num.textContent = i + 1;
+        const text = document.createElement('span');
+        text.textContent = q;
+        li.appendChild(num);
+        li.appendChild(text);
+        list.appendChild(li);
+      });
+
+      // Lock overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'board-lock';
+      overlay.textContent = 'Select your class and your name to begin.';
+      $('writing-shell').appendChild(overlay);
+
+      // Course / student selectors
+      const courseSelect = $('course-select');
+      const studentSelect = $('student-select');
+
+      courseSelect.addEventListener('change', () => {
+        const names = STUDENTS_BY_COURSE[courseSelect.value] || [];
+        studentSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = names.length ? 'Select your name' : 'First select your class';
+        studentSelect.appendChild(placeholder);
+        names.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          studentSelect.appendChild(opt);
+        });
+        studentSelect.disabled = names.length === 0;
+        syncLock();
+      });
+      studentSelect.addEventListener('change', syncLock);
+
+      // Writing area
+      $('answer-text').addEventListener('input', () => {
+        if (answerChecked) {
+          // Editing after checking requires checking again
+          answerChecked = false;
+          const msg = $('result-message');
+          msg.className = 'result';
+          msg.textContent = '';
+          updateReportState();
+        }
+        updateCounter();
+      });
+      $('verify-btn').addEventListener('click', checkAnswer);
+      $('restart-btn').addEventListener('click', restartWriting);
+      $('download-report-btn').addEventListener('click', downloadReport);
+
+      lockBoard();
+    });
+  </script>
+</body>
+</html>
